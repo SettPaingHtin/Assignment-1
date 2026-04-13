@@ -33,6 +33,7 @@ let g_selectedSegments = 10;
 
 // The array to store our shape objects
 let g_shapesList = [];
+let g_showPicture = false;
 
 function setupWebGL() {
   canvas = document.getElementById('webgl');
@@ -71,16 +72,23 @@ function connectVariablesToGLSL() {
 
 function addActionsForHtmlUI() {
   // Button Events
-  document.getElementById('clearButton').onclick = function() { g_shapesList = []; renderAllShapes(); };
+  document.getElementById('clearButton').onclick = function() { g_shapesList = []; g_showPicture = false; renderAllShapes(); };
   document.getElementById('pointButton').onclick = function() { g_selectedType = 'POINT'; };
   document.getElementById('triangleButton').onclick = function() { g_selectedType = 'TRIANGLE'; };
   document.getElementById('circleButton').onclick = function() { g_selectedType = 'CIRCLE'; };
-  document.getElementById('pictureButton').onclick = drawMyPicture;
+  document.getElementById('pictureButton').onclick = function() { 
+    g_showPicture = true; 
+    renderAllShapes(); 
+  };
 
   // Color Slider Events
   document.getElementById('redSlide').addEventListener('mouseup', function() { g_selectedColor[0] = this.value / 100; });
   document.getElementById('greenSlide').addEventListener('mouseup', function() { g_selectedColor[1] = this.value / 100; });
   document.getElementById('blueSlide').addEventListener('mouseup', function() { g_selectedColor[2] = this.value / 100; });
+
+  document.getElementById('alphaSlide').addEventListener('mouseup', function() { 
+    g_selectedColor[3] = this.value / 100; 
+  });
 
   // Size and Segment Sliders
   document.getElementById('sizeSlide').addEventListener('mouseup', function() { g_selectedSize = this.value; });
@@ -98,6 +106,9 @@ function main() {
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
@@ -138,10 +149,13 @@ function convertCoordinatesEventToGL(ev) {
 }
 
 function renderAllShapes() {
-  // Clear <canvas>
+
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  // Iterate and render every shape in the global list
+  if (g_showPicture) {
+    drawMyPicture();
+  }
+
   var len = g_shapesList.length;
   for (var i = 0; i < len; i++) {
     g_shapesList[i].render();
@@ -149,48 +163,73 @@ function renderAllShapes() {
 }
 
 function drawMyPicture() {
-    gl.clear(gl.COLOR_BUFFER_BIT);
-  
-    
-    gl.uniform4f(u_FragColor, 0.2, 0.5, 1.0, 1.0);
-    drawTriangle([-0.3, 0.1, 0.3, 0.1, -0.3, -0.2]);
-    drawTriangle([0.3, 0.1, 0.3, -0.2, -0.3, -0.2]);
-  
-    gl.uniform4f(u_FragColor, 0.8, 0.1, 0.1, 1.0);
-    drawTriangle([-0.6, -0.2, 0.6, -0.2, -0.6, -0.5]);
-    drawTriangle([0.6, -0.2, 0.6, -0.5, -0.6, -0.5]);
-  
-    gl.uniform4f(u_FragColor, 0.2, 0.2, 0.2, 1.0);
+  gl.uniform4f(u_FragColor, 0.2, 0.8, 0.2, 1.0);
+  drawTriangle([-1.0, -0.6, 1.0, -0.6, -1.0, -1.0]);
+  gl.uniform4f(u_FragColor, 0.15, 0.75, 0.15, 1.0);
+  drawTriangle([1.0, -0.6, 1.0, -1.0, -1.0, -1.0]);
 
-    drawTriangle([-0.45, -0.5, -0.25, -0.5, -0.45, -0.7]);
-    drawTriangle([-0.25, -0.5, -0.25, -0.7, -0.45, -0.7]);
+  gl.uniform4f(u_FragColor, 0.9, 0.8, 0.6, 1.0);
+  drawTriangle([-0.6, 0.2, 0.6, 0.2, -0.6, -0.6]);
+  gl.uniform4f(u_FragColor, 0.85, 0.75, 0.55, 1.0);
+  drawTriangle([0.6, 0.2, 0.6, -0.6, -0.6, -0.6]);
 
-    drawTriangle([0.25, -0.5, 0.45, -0.5, 0.25, -0.7]);
-    drawTriangle([0.45, -0.5, 0.45, -0.7, 0.25, -0.7]);
-  
-    gl.uniform4f(u_FragColor, 1.0, 0.9, 0.1, 1.0);
+  gl.uniform4f(u_FragColor, 0.3, 0.3, 0.3, 1.0);
+  drawTriangle([0.4, 0.8, 0.55, 0.8, 0.4, 0.4]);
+  gl.uniform4f(u_FragColor, 0.25, 0.25, 0.25, 1.0);
+  drawTriangle([0.55, 0.8, 0.55, 0.4, 0.4, 0.4]);
 
-    drawTriangle([-0.35, -0.25, -0.15, -0.25, -0.35, -0.29]);
-    drawTriangle([-0.15, -0.25, -0.15, -0.29, -0.35, -0.29]);
+  gl.uniform4f(u_FragColor, 1.0, 0.1, 0.1, 1.0);
+  drawTriangle([-0.7, 0.2, 0.0, 0.2, 0.0, 0.7]);
+  gl.uniform4f(u_FragColor, 0.4, 0.0, 0.0, 1.0);
+  drawTriangle([0.0, 0.2, 0.7, 0.2, 0.0, 0.7]);
 
-    drawTriangle([-0.35, -0.29, -0.31, -0.29, -0.35, -0.33]);
-    drawTriangle([-0.31, -0.29, -0.31, -0.33, -0.35, -0.33]);
+  gl.uniform4f(u_FragColor, 0.4, 0.2, 0.1, 1.0);
+  drawTriangle([-0.15, -0.1, 0.15, -0.1, -0.15, -0.6]);
+  gl.uniform4f(u_FragColor, 0.35, 0.15, 0.05, 1.0);
+  drawTriangle([0.15, -0.1, 0.15, -0.6, -0.15, -0.6]);
 
-    drawTriangle([-0.35, -0.33, -0.15, -0.33, -0.35, -0.37]);
-    drawTriangle([-0.15, -0.33, -0.15, -0.37, -0.35, -0.37]);
+  gl.uniform4f(u_FragColor, 1.0, 0.9, 0.1, 1.0);
+  drawTriangle([-0.8, 0.9, -0.7, 0.8, -0.9, 0.8]);
+  gl.uniform4f(u_FragColor, 0.95, 0.85, 0.05, 1.0);
+  drawTriangle([-0.7, 0.8, -0.8, 0.7, -0.9, 0.8]);
 
-    drawTriangle([-0.19, -0.37, -0.15, -0.37, -0.19, -0.41]);
-    drawTriangle([-0.15, -0.37, -0.15, -0.41, -0.19, -0.41]);
+  gl.uniform4f(u_FragColor, 0.0, 0.1, 0.4, 1.0);
+  drawTriangle([-0.45, 0.0, -0.25, 0.0, -0.45, -0.05]);
+  gl.uniform4f(u_FragColor, 0.1, 0.4, 0.9, 1.0);
+  drawTriangle([-0.25, 0.0, -0.25, -0.05, -0.45, -0.05]);
 
-    drawTriangle([-0.35, -0.41, -0.15, -0.41, -0.35, -0.45]);
-    drawTriangle([-0.15, -0.41, -0.15, -0.45, -0.35, -0.45]);
+  gl.uniform4f(u_FragColor, 0.0, 0.1, 0.4, 1.0);
+  drawTriangle([-0.45, -0.05, -0.40, -0.05, -0.45, -0.15]);
+  gl.uniform4f(u_FragColor, 0.1, 0.4, 0.9, 1.0);
+  drawTriangle([-0.40, -0.05, -0.40, -0.15, -0.45, -0.15]);
 
-    drawTriangle([0.15, -0.25, 0.19, -0.25, 0.15, -0.45]);
-    drawTriangle([0.19, -0.25, 0.19, -0.45, 0.15, -0.45]);
+  gl.uniform4f(u_FragColor, 0.0, 0.1, 0.4, 1.0);
+  drawTriangle([-0.45, -0.15, -0.25, -0.15, -0.45, -0.20]);
+  gl.uniform4f(u_FragColor, 0.1, 0.4, 0.9, 1.0);
+  drawTriangle([-0.25, -0.15, -0.25, -0.20, -0.45, -0.20]);
 
-    drawTriangle([0.31, -0.25, 0.35, -0.25, 0.31, -0.45]);
-    drawTriangle([0.35, -0.25, 0.35, -0.45, 0.31, -0.45]);
+  gl.uniform4f(u_FragColor, 0.0, 0.1, 0.4, 1.0);
+  drawTriangle([-0.30, -0.20, -0.25, -0.20, -0.30, -0.30]);
+  gl.uniform4f(u_FragColor, 0.1, 0.4, 0.9, 1.0);
+  drawTriangle([-0.25, -0.20, -0.25, -0.30, -0.30, -0.30]);
 
-    drawTriangle([0.19, -0.33, 0.31, -0.33, 0.19, -0.37]);
-    drawTriangle([0.31, -0.33, 0.31, -0.37, 0.19, -0.37]);
-  }
+  gl.uniform4f(u_FragColor, 0.0, 0.1, 0.4, 1.0);
+  drawTriangle([-0.45, -0.30, -0.25, -0.30, -0.45, -0.35]);
+  gl.uniform4f(u_FragColor, 0.1, 0.4, 0.9, 1.0);
+  drawTriangle([-0.25, -0.30, -0.25, -0.35, -0.45, -0.35]);
+
+  gl.uniform4f(u_FragColor, 0.0, 0.1, 0.4, 1.0);
+  drawTriangle([0.25, 0.0, 0.30, 0.0, 0.25, -0.35]);
+  gl.uniform4f(u_FragColor, 0.1, 0.4, 0.9, 1.0);
+  drawTriangle([0.30, 0.0, 0.30, -0.35, 0.25, -0.35]);
+
+  gl.uniform4f(u_FragColor, 0.0, 0.1, 0.4, 1.0);
+  drawTriangle([0.40, 0.0, 0.45, 0.0, 0.40, -0.35]);
+  gl.uniform4f(u_FragColor, 0.1, 0.4, 0.9, 1.0);
+  drawTriangle([0.45, 0.0, 0.45, -0.35, 0.40, -0.35]);
+
+  gl.uniform4f(u_FragColor, 0.0, 0.1, 0.4, 1.0);
+  drawTriangle([0.30, -0.15, 0.40, -0.15, 0.30, -0.20]);
+  gl.uniform4f(u_FragColor, 0.1, 0.4, 0.9, 1.0);
+  drawTriangle([0.40, -0.15, 0.40, -0.20, 0.30, -0.20]);
+}
